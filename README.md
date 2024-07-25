@@ -1,1 +1,1 @@
-The Repository is used to record the related code of polar coding.
+MATLAB implment of Channel Coding.
