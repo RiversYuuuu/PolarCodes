@@ -1,9 +1,9 @@
 function [begin_layers, end_layers] = polar_decode_prepare(N)
-k = log2(N);
-begin_layers = ones(N,1);
-end_layers = zeros(N,1);
-begin_layers(1,1) = k;
-for index = 2 : N
+n = log2(N);
+begin_layers = ones(N, 1);
+end_layers = zeros(N, 1);
+begin_layers(1) = n;
+for index = 2:N
     end_layer = 1;
     index_cp = index;
     while 1 == mod(index_cp,2)
