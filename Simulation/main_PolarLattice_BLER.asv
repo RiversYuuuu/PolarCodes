@@ -1,0 +1,83 @@
+clear
+clc
+%%% Parameter
+N = 128;
+R = [0.22, 0.91];
+K = round(N*R);
+
+list_size = 32;
+VNR_range = 0:0.5:3;
+max_iteration = 1e6;
+max_error = 200;
+
+GN = get_generate_matrix(log2(N));
+
+V_lamda = 2^(N*2-N*sum(R));
+level_num = length(R);
+
+%%% Construction
+construct_VNR = VNR_range(end);
+construct_sigma = 1 / sqrt(10^(construct_VNR/10)*(2*pi*exp(1))) * (V_lamda^(1/N));
+frozen_flag = ones(N, level_num);
+sorted_indice = zeros(N, level_num);
+error_bound = zeros(N, level_num);
+for level = 1 : level_num
+    if R(level) == 1
+        sorted_indice(:, level) = 1:N;
+    else
+        [sorted_indice(:, level), error_bound(:, level)] = getSortIndicesOf_modLambdaGauChannel(N, construct_sigma, ones(1, 2^level_num)/ 2^level_num, level);
+    end
+    frozen_flag(sorted_indice(1:K(level), level), level) = 0;
+end
+
+[begin_layers, end_layers] = polar_decode_prepare(N);
+error_count = zeros(size(VNR_range));
+BLER = zeros(size(VNR_range));
+for VNR_index = 1:length(VNR_range)
+    VNR = VNR_range(VNR_index);
+    noise_sigma = 1 / sqrt(10^(VNR/10)*(2*pi*exp(1))) * (V_lamda^(1/N));
+    msg_length = [0, 0];
+    for i = 1:max_iteration
+        %%% Encoding
+        info = cell(1, level_num);
+        for level = 1 : level_num
+            info{1, level} = round(rand(1,K(level)));
+        end
+        lambda = polar_lattice_encoder(info, frozen_flag);
+        %%% Transmission
+        recv_signal = lambda+noise_sigma*randn(N, 1);
+        %%% Decoding
+        info_hat = zeros(N, level_num);
+        LLR = zeros(N, level_num);
+        for level = 1:level_num
+            p0 = zeros(1,N);
+            p1 = zeros(1,N);
+            mod_recv_signal = mod(recv_signal, 2);
+            sigma_level = noise_sigma/2^(level-1);
+            for bias = -8 : 2 : 8
+                p0 = p0 + normpdf(mod_recv_signal, 0+bias, sigma_level);
+                p1 = p1 + normpdf(mod_recv_signal, 1+bias, sigma_level);
+            end
+            LLR(level,:) = log(p0./p1);
+            [~, info_hat(:, level)] = polar_listdecoder(LLR(level, :), list_size, frozen_flag(level, :));
+            recv_signal = 0.5*(recv_signal-polar_encoder4lattice(info_hat(:, level), frozen_flag(:, level)));
+        end
+        
+        error_count(1:end-1, VNR_index) = error(1:end-1, VNR_index) + (sum(info_hat~=x, 2) > 0);
+        error_count(end, VNR_index) = error(end, VNR_index) + (sum(sum(x_hat~=x, 2)) > 0);
+        
+        if mod(iter, 100)==0
+            fprintf(repmat('\b', 1, 1+sum(msg_length)));
+            msg1 = ['VNR = ',num2str(VNR,'%.2f'),' dB, Run ', num2str(iter), '/', num2str(max_iteration), ' times'];
+            msg2 = ['Error ', num2str(error_count(VNR_index)), ' times, ', 'BLER = ', num2str(error_count(VNR_index)/iter, '%.2e')];
+            msg_length = [length(msg1), length(msg2)];
+            fprintf([msg1, '\n', msg2]);
+            if error_count(EbN0_index)>=max_error||iter==max_iteration
+                fprintf('\n\n\n');
+                break;
+            end
+        end
+    end
+end
+
+

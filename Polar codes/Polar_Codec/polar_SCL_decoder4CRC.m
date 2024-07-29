@@ -1,4 +1,4 @@
-function [codeword_hat, info_hat] = polar_SCL_decoder(LLR, list_size, frozen_flag, begin_layers, end_layers)
+function [codeword_hat, info_hat] = polar_SCL_decoder4CRC(LLR, list_size, frozen_flag, begin_layers, end_layers)
 N = length(LLR);
 K = sum(frozen_flag==0);
 
@@ -132,5 +132,5 @@ for bit_index = 0:N-1
     end
 end
 [~, sorted_index] = sort(path_metric);
-codeword_hat = hard_info(N:end,2*sorted_index(1)-1);
-info_hat = info_hat(:, sorted_index(1));
+codeword_hat = hard_info(N:end,2*sorted_index-1);
+info_hat = info_hat(:, sorted_index);
