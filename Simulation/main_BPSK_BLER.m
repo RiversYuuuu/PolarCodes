@@ -26,7 +26,7 @@ for EbN0_index = 1:length(EbN0_range)
     for iter = 1:max_iteration
         %%% Encoding
         info = rand(K, 1) >= 0.5;
-        codeword = polar_encoder(info, frozen_flag);
+        codeword = polar_encoder_channel(info, frozen_flag);
         %%% Transmission
         send_signals = 1-2*codeword;
         recv_signal = send_signals+noise_sigma*randn(N, 1);

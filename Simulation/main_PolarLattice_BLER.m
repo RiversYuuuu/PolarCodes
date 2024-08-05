@@ -6,7 +6,7 @@ R = [0.22, 0.91];
 K = round(N*R);
 
 list_size = 1;
-VNR_range = 0:0.5:3;
+VNR_range = 0:0.5:2.5;
 max_iteration = 1e6;
 max_error = 200;
 V_lamda = 2^(N*2-N*sum(R));
