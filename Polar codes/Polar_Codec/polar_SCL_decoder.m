@@ -76,7 +76,7 @@ for bit_index = 0:N-1
             equal_middle_num = sum(sorted_path_metric_double(1:list_size)==path_metric_middle);
             equal_middle_count = 0;
             compare_result = zeros(2, list_size);
-            unactive_index = [];
+            unactive_flag = zeros(list_size, 1);
             for list_index = 1:list_size
                 for bit_value = 0:1
                     if path_metric_double(1+bit_value, list_index)<path_metric_middle
@@ -89,7 +89,7 @@ for bit_index = 0:N-1
                     end
                 end
                 if compare_result(1, list_index)+compare_result(2, list_index)==0
-                    unactive_index(end+1) = list_index;
+                    unactive_flag(list_index) = 1;
                 end
             end
             %%% Retain list_size Number of Candidate Paths
@@ -103,8 +103,9 @@ for bit_index = 0:N-1
                     hard_info(1, 2*list_index-bitxor(mod(bit_index, 2), 1)) = 0;
                     path_metric(list_index) = path_metric_double(1, list_index);
                 elseif compare_result(1, list_index)==1 && compare_result(2, list_index)==1
-                    new_index = unactive_index(end);
-                    unactive_index(end) = [];
+                    new_index = find(unactive_flag==1);
+                    new_index = new_index(1);
+                    unactive_flag(new_index) = 0;
                     soft_info(:, new_index) = soft_info(:, list_index);
                     info_hat(:, new_index) = info_hat(:, list_index);
                     hard_info(:, [2*new_index-1, 2*new_index]) = hard_info(:, [2*list_index-1, 2*list_index]);
