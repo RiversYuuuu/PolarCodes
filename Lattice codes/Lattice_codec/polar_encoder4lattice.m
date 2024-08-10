@@ -1,11 +1,9 @@
-function [codeword] = polar_encoder4lattice(info, frozen_flag)
-N = length(frozen_flag);
+function [codeword] = polar_encoder4lattice(uncoded_bits)
+N = length(uncoded_bits);
 n = log2(N);
 index = (1:1:N);
 odds = (1:2:N);
 evens = (2:2:N);
-uncoded_bits = zeros(N, 1);
-uncoded_bits(frozen_flag==0) = info;
 temp = [uncoded_bits, uncoded_bits];
 for layer = 1:n
     odd_index = index(odds);

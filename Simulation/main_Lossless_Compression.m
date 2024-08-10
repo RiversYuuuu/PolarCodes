@@ -3,8 +3,8 @@ clc
 %%% Parameter
 N = 2^10;
 Ber_p = 0.11;
-rate = 0.6;
-K = round(N*rate);
+R = 0.6;
+K = round(N*R);
 max_iterasion = 1e4;
 
 
@@ -29,7 +29,7 @@ for iter=1:max_iterasion
     bit_error_count = bit_error_count+sum(info~=info_hat);
     if mod(iter, 100)==0
         fprintf(repmat('\b', 1, 1+msg_length));
-        msg = ['Compression Rate = ', num2str(rate), ', Run ', num2str(iter), ' times, BER = ', num2str(bit_error_count/N/iter, '%.2e')];
+        msg = ['Compression Rate = ', num2str(R), ', Run ', num2str(iter), ' times, BER = ', num2str(bit_error_count/N/iter, '%.2e')];
         msg_length = length(msg);
         fprintf([msg, '\n']);
     end
