@@ -10,14 +10,14 @@ for bit_index = 1:N
     Q_array = P_array;
     for binart_index = 1:n
         if binary_array(binart_index) == 0
-            [~,W] = WPlusMinus(Q_array);
+            [~,W] = channel_polarization(Q_array);
             Z_W = 2*sum(W(1,:).*sqrt(W(2,:).*(1-W(2,:))));
             Z(bit_index) = min([2*Z(bit_index)-Z(bit_index)^2, Z_W]);
         else
-            [W,~] = WPlusMinus(Q_array);
+            [W,~] = channel_polarization(Q_array);
             Z(bit_index) = Z(bit_index)^2;
         end
-        Q_array = degrade_merge(W, quan_level);
+        Q_array = degrade_merge_mex(W, quan_level);
     end
     error_bound(bit_index) = min([sum(Q_array(1,:).*Q_array(2,:)), Z(bit_index)]);
 end

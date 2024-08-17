@@ -1,10 +1,10 @@
 clear
 clc
 %%% Parameter
-N = 2048;
+N = 1024;
 R = 0.5;
 K = round(N*R);
-list_size = 4;
+list_size = 1;
 EbN0_range = 1:0.25:2.5;
 max_iteration = 1e6;
 patch_size = 100;
@@ -27,7 +27,7 @@ for EbN0_index = 1:length(EbN0_range)
     info = zeros(K, 100);
     info_hat = zeros(K, 100);
     for patch_index = 1:max_iteration/100
-        for iter = 1:patch_size
+        parfor iter = 1:patch_size
             %%% Encoding
             info(:, iter) = rand(K, 1) >= 0.5;
             codeword = polar_encoder_channel(info(:, iter), frozen_flag);
@@ -38,7 +38,8 @@ for EbN0_index = 1:length(EbN0_range)
             LLR = 2*recv_signal/noise_sigma^2;
             %         [~, info_hat] = polar_SC_decoder(LLR, frozen_flag, begin_layers, end_layers);
             %         [~, info_hat] = polar_SCL_decoder(LLR, list_size, frozen_flag, begin_layers, end_layers);
-            [~, info_hat(:, iter)] = polar_SCL_decoder_mex(LLR, list_size, frozen_flag, begin_layers, end_layers);
+            [~, uncoded_bits] = polar_SCL_decoder_mex(LLR, list_size, frozen_flag, begin_layers, end_layers);
+            info_hat(:, iter) = uncoded_bits(frozen_flag==0);
         end
         %%% Statistics
         error_count(EbN0_index) = error_count(EbN0_index)+sum(sum(info~=info_hat)~=0);

@@ -2,7 +2,7 @@ function [mutual_info, mutual_info_var, capacity] = get_mutual_info(send_set, se
 %%% Parameter
 level_num = log2(length(send_set));
 send_power = sum(send_prob_set.*abs(send_set).^2);
-dim = 2-(sum(imag(send_set))==0);
+dim = 2-(sum(abs(imag(send_set)))==0);
 mutual_info = zeros(level_num+1, length(SNR_range));
 
 %%% Shannon Capacity
@@ -10,9 +10,9 @@ variance = 1./(dim*10.^(SNR_range/10));
 capacity = dim*(1/2)*log2(1+1./variance);
 
 %%% Quantization
-quan_len = 0.05;
-quan_max = 5*max(send_set);
-quan_range = -quan_max:quan_len:quan_max;
+quan_num = 200;
+quan_max = 2*max(real(send_set));
+quan_range = linspace(quan_max, -quan_max, quan_num);
 recv_signal = zeros(1, length(quan_range)^dim);
 recv_index = 1;
 for recv_real = quan_range

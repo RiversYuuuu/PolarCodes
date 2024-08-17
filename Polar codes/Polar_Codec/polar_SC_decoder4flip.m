@@ -1,9 +1,12 @@
-function [uncoded_bits] = polar_SC_decoder4shaping(p, uncoded_bits, type_flag, begin_layers, end_layers)
-N = length(type_flag);
+function [codeword_hat, uncoded_bits, uncoded_bits_soft] = polar_SC_decoder4flip(LLR, flip_index, frozen_flag, begin_layers, end_layers)
+N = length(LLR);
+K = N-sum(frozen_flag);
+uncoded_bits = zeros([N, 1]);
+uncoded_bits_soft = zeros([N, 1]);
 
 soft_info = zeros(2*N-1, 1);
 hard_info = zeros(2*N-1, 2);
-soft_info(N:end) = log(p./(1-p));
+soft_info(N:end) = LLR;
 
 minsum_f = @(LLR1, LLR2) sign(LLR1)*sign(LLR2)*min(abs(LLR1), abs(LLR2));
 minsum_g = @(LLR1, LLR2, Bit) (1-2*Bit)*LLR1+LLR2;
@@ -28,11 +31,17 @@ for bit_index = 1:N
         end
     end
     %%% Hard Decision By Soft Information
-    if 2~=type_flag(bit_index)
-        hard_info(1, 1+mod(bit_index+1, 2)) = uncoded_bits(bit_index);
+    if 1==frozen_flag(bit_index)
+        hard_info(1, 1+mod(bit_index+1, 2)) = 0;
+        uncoded_bits(bit_index,1) =  0;
     else
         hard_info(1, 1+mod(bit_index+1, 2)) = soft_info(1)<0;
-        uncoded_bits(bit_index) = soft_info(1)<0;
+        uncoded_bits(bit_index,1) =  soft_info(1)<0;
+    end
+    uncoded_bits_soft(bit_index,1) = soft_info(1);
+    if ismember(bit_index, flip_index)
+        hard_info(1, 1+mod(bit_index+1, 2)) = bitxor(hard_info(1, 1+mod(bit_index+1, 2)), 1);
+        uncoded_bits(bit_index,1) = bitxor(uncoded_bits(bit_index,1), 1);
     end
     %%% Calculate Hard Information Backword
     end_layer = end_layers(bit_index);
@@ -44,5 +53,6 @@ for bit_index = 1:N
         end
     end
 end
+codeword_hat = hard_info(N:end,1);
 end
 
