@@ -1,4 +1,4 @@
-function [uncoded_bits] = polar_SC_decoder4shaping(p, uncoded_bits, type_flag, begin_layers, end_layers)
+function [uncoded_bits, codeword] = polar_SC_decoder4shaping(p, uncoded_bits, type_flag, begin_layers, end_layers)
 N = length(type_flag);
 
 soft_info = zeros(2*N-1, 1);
@@ -44,5 +44,6 @@ for bit_index = 1:N
         end
     end
 end
+codeword = hard_info(N:end, 1);
 end
 

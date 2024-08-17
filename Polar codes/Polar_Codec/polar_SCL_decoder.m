@@ -1,4 +1,4 @@
-function [codeword_hat, info_hat] = polar_SCL_decoder(LLR, list_size, type_flag, begin_layers, end_layers)
+function [codeword_hat, uncoded_bits_hat] = polar_SCL_decoder(LLR, list_size, type_flag, begin_layers, end_layers)
 N = length(LLR);
 K = sum(type_flag==0);
 
@@ -6,7 +6,7 @@ path_metric = zeros(list_size, 1);
 active_flag = zeros(list_size, 1);
 soft_info = zeros(2*N-1, list_size);
 hard_info = zeros(2*N-1, 2*list_size);
-info_hat = zeros([N, list_size]);
+uncoded_bits_hat = zeros([N, list_size]);
 
 soft_info(N:end, 1) = LLR;
 active_flag(1) = 1;
@@ -46,7 +46,6 @@ for bit_index = 0:N-1
             end
             path_metric(list_index) = path_metric(list_index)+log(1+exp(-soft_info(1,list_index)));
             hard_info(1, 2*list_index-bitxor(mod(bit_index, 2), 1)) = 0;
-            info_hat(bit_index+1) = 0;
         end
     else
         current_list_size = sum(active_flag);
@@ -56,9 +55,9 @@ for bit_index = 0:N-1
                 new_index = list_index+current_list_size;
                 active_flag(new_index) = 1;
                 soft_info(:, new_index) = soft_info(:, list_index);
-                info_hat(:, new_index) = info_hat(:, list_index);
+                uncoded_bits_hat(:, new_index) = uncoded_bits_hat(:, list_index);
                 hard_info(:, [2*new_index-1, 2*new_index]) = hard_info(:, [2*list_index-1, 2*list_index]);
-                info_hat(bit_index+1, [list_index, new_index]) = [0, 1];
+                uncoded_bits_hat(bit_index+1, [list_index, new_index]) = [0, 1];
                 hard_info(1, [2*list_index-bitxor(mod(bit_index, 2), 1), 2*new_index-bitxor(mod(bit_index, 2), 1)]) = [0, 1];
                 path_metric([list_index, new_index]) = path_metric(list_index) + [log(1 + exp(-soft_info(1,list_index))); log(1 + exp(soft_info(1,new_index)))];
             end
@@ -95,11 +94,11 @@ for bit_index = 0:N-1
             %%% Retain list_size Number of Candidate Paths
             for list_index = 1:list_size
                 if compare_result(1, list_index)==0 && compare_result(2, list_index)==1
-                    info_hat(bit_index+1, list_index) = 1;
+                    uncoded_bits_hat(bit_index+1, list_index) = 1;
                     hard_info(1, 2*list_index-bitxor(mod(bit_index, 2), 1)) = 1;
                     path_metric(list_index) = path_metric_double(2, list_index);
                 elseif compare_result(1, list_index)==1 && compare_result(2, list_index)==0
-                    info_hat(bit_index+1, list_index) = 0;
+                    uncoded_bits_hat(bit_index+1, list_index) = 0;
                     hard_info(1, 2*list_index-bitxor(mod(bit_index, 2), 1)) = 0;
                     path_metric(list_index) = path_metric_double(1, list_index);
                 elseif compare_result(1, list_index)==1 && compare_result(2, list_index)==1
@@ -107,9 +106,9 @@ for bit_index = 0:N-1
                     new_index = new_index(1);
                     unactive_flag(new_index) = 0;
                     soft_info(:, new_index) = soft_info(:, list_index);
-                    info_hat(:, new_index) = info_hat(:, list_index);
+                    uncoded_bits_hat(:, new_index) = uncoded_bits_hat(:, list_index);
                     hard_info(:, [2*new_index-1, 2*new_index]) = hard_info(:, [2*list_index-1, 2*list_index]);
-                    info_hat(bit_index+1, [list_index, new_index]) = [0, 1];
+                    uncoded_bits_hat(bit_index+1, [list_index, new_index]) = [0, 1];
                     hard_info(1, [2*list_index-bitxor(mod(bit_index, 2), 1), 2*new_index-bitxor(mod(bit_index, 2), 1)]) = [0, 1];
                     path_metric([list_index, new_index]) = [path_metric_double(1, list_index), path_metric_double(2, list_index)];
                 end
@@ -133,4 +132,4 @@ for bit_index = 0:N-1
 end
 [~, sorted_index] = sort(path_metric);
 codeword_hat = hard_info(N:end,2*sorted_index(1)-1);
-info_hat = info_hat(:, sorted_index(1));
+uncoded_bits_hat = uncoded_bits_hat(:, sorted_index(1));

@@ -1,7 +1,5 @@
 function [codeword_hat, uncoded_bits_hat, uncoded_bits_soft] = polar_SCL_decoder4CRC(LLR, list_size, type_flag, begin_layers, end_layers)
 N = length(LLR);
-K = sum(type_flag==0);
-
 path_metric = zeros(list_size, 1);
 active_flag = zeros(list_size, 1);
 soft_info = zeros(2*N-1, list_size);
@@ -47,7 +45,6 @@ for bit_index = 0:N-1
             end
             path_metric(list_index) = path_metric(list_index)+log(1+exp(-soft_info(1,list_index)));
             hard_info(1, 2*list_index-bitxor(mod(bit_index, 2), 1)) = 0;
-            uncoded_bits_hat(bit_index+1, list_index) = 0;
             uncoded_bits_soft(bit_index+1, list_index) = soft_info(1,list_index);
         end
     else

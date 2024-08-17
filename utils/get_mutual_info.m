@@ -6,7 +6,7 @@ dim = 2-(sum(abs(imag(send_set)))==0);
 mutual_info = zeros(level_num+1, length(SNR_range));
 
 %%% Shannon Capacity
-variance = 1./(dim*10.^(SNR_range/10));
+variance = 1./(10.^(SNR_range/10));
 capacity = dim*(1/2)*log2(1+1./variance);
 
 %%% Quantization
@@ -27,10 +27,11 @@ for recv_real = quan_range
     end
 end
 
-%%% P(X=0) Of Levels
+%%% P(b1,...,bi) Of Levels
 levels_prob = cell(1, level_num);
 for level = 1:level_num
     level_prob = zeros(2^level, 1);
+    step = 2^(level-1);
     for index = 1:2^level
         step = 2^level;
         start_index = index;

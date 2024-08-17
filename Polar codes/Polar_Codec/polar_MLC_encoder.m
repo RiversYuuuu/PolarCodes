@@ -4,5 +4,5 @@ codeword = zeros(N, level_num);
 for level = 1:level_num
     codeword(:, level) = polar_encoder_channel(info{1, level}, frozen_flag(level, :));
 end
-send_signal = send_set(1+bi2de(codeword)).';
+send_signal = reshape(send_set(1+bi2de(codeword)), [], 1);
 end
