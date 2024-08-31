@@ -1,11 +1,11 @@
 clear
 clc
 %%% Parameter
-N = 2048;
+N = 1024;
 R = 0.5;
 K = round(N*R);
-list_size = 32;
-EbN0_range = 1:0.25:2.5;
+list_size = 8;
+EbN0_range = 0:0.25:2.5;
 max_iteration = 1e6;
 patch_size = 100;
 max_error = 200;

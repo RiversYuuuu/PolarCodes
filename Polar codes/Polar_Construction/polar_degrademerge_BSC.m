@@ -1,6 +1,6 @@
 function [error_bound, sorted_indices] = polar_degrademerge_BSC(N, P_array, quan_level)
 n = log2(N);
-% [P_array] = degrade_merge_mex(P_array, quan_level);
+% [P_array] = degrade_merge(P_array, quan_level);
 [P_array] = degrade_merge_mex(P_array, quan_level);
 channel_layer = cell(1, 1);
 channel_layer{1} = P_array;
